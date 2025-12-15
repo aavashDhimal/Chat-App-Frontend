@@ -4,7 +4,7 @@ import SideBar from '@/components/layout/chat/Sidebar';
 import MessageBox from '@/components/layout/chat/messages';
 import InputBox from '@/components/layout/chat/InputBox';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { startTyping, stopTyping, sendMessage, socket, joinRoom } from '@/socket';
+import { startTyping, stopTyping, sendMessage, socket } from '@/socket';
 import { UserListModal } from '@/components/modals/userList';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useGetRoomsQuery } from '@/services/roomApi';
@@ -19,7 +19,7 @@ import { useGetRoomsQuery } from '@/services/roomApi';
 interface Conversation {
   _id: string;
   name: string;
-  reciverId : string
+  reciverId?: string;
 }
 
 export default function ChatPage() {
@@ -56,7 +56,6 @@ export default function ChatPage() {
   }, [roomList, navigate, selectedConversation, searchParams])
 
   useEffect(() => {
-    // Listen for global active users list
     const onActiveList = (data: { users: string[] }) => {
       setActiveUserIds(data.users || [])
     }
@@ -68,10 +67,17 @@ export default function ChatPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (usersList === false) {
+      roomListData.refetch();
+    }
+  }, [usersList])
 
-  console.log(activeUserIds,"active users",activeUserIds.includes(selectedConversation?._id || ''),selectedConversation?._id)
+  const handleModalClose = (roomId?: string) => {
+    setSelectedConversation(roomList.find(r => r._id === roomId));
+    setisUserListModalOpen(false)
+  }
 
-  // typing detection: emit start/stop based on input activity
   const typingTimerRef = useRef<number | null>(null)
   const typingSentRef = useRef(false)
 
@@ -98,16 +104,16 @@ export default function ChatPage() {
     } catch (err) {
       // ignore
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messageInput, selectedConversation?._id])
 
   const handleSendMessage = () => {
     if (!messageInput.trim()) return;
 
+    // send via socket helper (require to avoid module order issues)
     if (selectedConversation?._id) {
       try {
 
-        sendMessage({ roomId: selectedConversation._id, content: messageInput, sender: localStorage.getItem("uid") })
+        sendMessage({ roomId: selectedConversation._id, content: messageInput, type: 'text' })
         stopTyping(selectedConversation._id)
       } catch (err) {
         // ignore send errors here
@@ -123,7 +129,6 @@ export default function ChatPage() {
         <div className="flex h-screen w-full">
           <SideBar
             setisUserListModalOpen={setisUserListModalOpen}
-            // conversations={conversations}
             selectedConversation={selectedConversation}
             onSelectConversation={setSelectedConversation}
             onAddConversation={() => setisUserListModalOpen(true)}
@@ -152,12 +157,8 @@ export default function ChatPage() {
           </main>
         </div>
       </SidebarProvider>
-      <UserListModal open={usersList} onClose={(roomId: string = selectedConversation?._id) => {
-        window.location.href = `?roomId=${roomId}`
-        setSelectedConversation(roomList.find(r => r._id === roomId));
-        setisUserListModalOpen(false)
-      }}
-      />
+      {usersList && <UserListModal open={usersList} onClose={handleModalClose}
+      />}
     </>
   );
 }

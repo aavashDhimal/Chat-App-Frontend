@@ -8,24 +8,31 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useGetUsersQuery } from "@/services/usersAPI";
 import { useCreateRoomMutation } from "@/services/roomApi";
+import { useEffect } from "react";
 
 interface UserListModalProps {
     open: boolean
-    onClose: (roomId :string) => void
+    onClose: (roomId?: string) => void
 }
 
 export function UserListModal({ open, onClose }: UserListModalProps) {
+
     const [createRoom] = useCreateRoomMutation();
 
-    async function addNewConversation( id: string ) {
-       const data = (await createRoom({ members: [id, localStorage.getItem('uid') || ''] })).data;
+    const { data: users } = useGetUsersQuery(
+        {},
+        { refetchOnMountOrArgChange: true }
+    );
+
+    async function addNewConversation(id: string) {
+        const data = (await createRoom({ members: [id, localStorage.getItem('uid') || ''] })).data;
 
         onClose(data._id);
     }
 
-    const { data: users } = useGetUsersQuery({});
+
     return (
-        <Dialog open={open} onOpenChange={(isOpen) => !isOpen } >
+        <Dialog open={open} onOpenChange={(isOpen) => !isOpen} >
             <DialogContent className="sm:max-w-md max-h-[400px] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Users</DialogTitle>
@@ -52,7 +59,7 @@ export function UserListModal({ open, onClose }: UserListModalProps) {
                 </div>
 
                 <div className="mt-4 text-right">
-                    <Button variant="ghost" onClick={onClose}>
+                    <Button variant="ghost" onClick={() => onClose()}>
                         Close
                     </Button>
                 </div>

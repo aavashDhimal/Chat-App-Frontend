@@ -89,7 +89,6 @@ export default function MessageBox({ roomId }: MessageBoxProps) {
     return () => {
       socket.off("message:receive", onMessage)
       socket.off("typing:UserModel", onTyping)
-      socket.off("active-list", onOnline)
       socket.off("message:read", onMessageRead)
       leaveRoom(roomId)
     }

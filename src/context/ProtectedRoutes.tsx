@@ -11,7 +11,6 @@ const location = useLocation()
 
 
 if (!isAuthenticated) {
-    console.log(isAuthenticated,"nonos")
 return <Navigate to="/login" replace state={{ from: location }} />
 }
 

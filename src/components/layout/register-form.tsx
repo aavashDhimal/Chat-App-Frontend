@@ -28,9 +28,7 @@ export default function RegisterForm({
     e.preventDefault()
     try {
       const result = await register({ name, email, password }).unwrap()
-      // save token and user id
       dispatch(setToken({ token: result.accessToken, user: result.user }))
-      // redirect to chat
       navigate("/chat")
     } catch (err) {
       console.error("Registration failed:", err)

@@ -1,9 +1,8 @@
-// src/socket.ts
 import { io, Socket } from "socket.io-client";
 
 type AnyObj = Record<string, any>;
 
-const socket: Socket = io("http://localhost:4040", {
+const socket: Socket = io(import.meta.env.VITE_API_BASE_URL, {
   autoConnect: false,
   transports: ["websocket"],
 });
