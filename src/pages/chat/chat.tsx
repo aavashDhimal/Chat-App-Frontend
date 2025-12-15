@@ -19,7 +19,7 @@ import { useGetRoomsQuery } from '@/services/roomApi';
 interface Conversation {
   _id: string;
   name: string;
-
+  reciverId : string
 }
 
 export default function ChatPage() {
@@ -58,7 +58,6 @@ export default function ChatPage() {
   useEffect(() => {
     // Listen for global active users list
     const onActiveList = (data: { users: string[] }) => {
-      console.log('active-list received:', data.users)
       setActiveUserIds(data.users || [])
     }
 
@@ -67,15 +66,10 @@ export default function ChatPage() {
     return () => {
       socket.off('active-list', onActiveList)
     }
-  }, [])
+  }, []);
 
-  const handleDeleteConversation = (id: string) => {
-    const filtered = conversations.filter(c => c._id !== id);
-    setConversations(filtered);
-    if (selectedConversation._id === id && filtered.length > 0) {
-      setSelectedConversation(filtered[0]);
-    }
-  };
+
+  console.log(activeUserIds,"active users",activeUserIds.includes(selectedConversation?._id || ''),selectedConversation?._id)
 
   // typing detection: emit start/stop based on input activity
   const typingTimerRef = useRef<number | null>(null)
@@ -110,11 +104,10 @@ export default function ChatPage() {
   const handleSendMessage = () => {
     if (!messageInput.trim()) return;
 
-    // send via socket helper (require to avoid module order issues)
     if (selectedConversation?._id) {
       try {
 
-        sendMessage({ roomId: selectedConversation._id, content: messageInput, type: 'text' })
+        sendMessage({ roomId: selectedConversation._id, content: messageInput, sender: localStorage.getItem("uid") })
         stopTyping(selectedConversation._id)
       } catch (err) {
         // ignore send errors here
@@ -123,7 +116,6 @@ export default function ChatPage() {
 
     setMessageInput('');
   };
-  console.log(activeUserIds, "activeUserIds")
 
   return (
     <>
@@ -135,7 +127,6 @@ export default function ChatPage() {
             selectedConversation={selectedConversation}
             onSelectConversation={setSelectedConversation}
             onAddConversation={() => setisUserListModalOpen(true)}
-            onDeleteConversation={handleDeleteConversation}
           />
 
           <main className="flex-1 flex flex-col bg-background">
@@ -146,7 +137,7 @@ export default function ChatPage() {
               <div>
                 <h2 className="font-semibold">{selectedConversation?.name}</h2>
                 <p className="text-xs text-muted-foreground">
-                  {activeUserIds.includes(selectedConversation?._id || '') ? 'Active now' : 'Offline'}
+                  {activeUserIds.includes(selectedConversation?.reciverId || '') ? 'Active now' : 'Offline'}
                 </p>
               </div>
             </div>
@@ -162,7 +153,7 @@ export default function ChatPage() {
         </div>
       </SidebarProvider>
       <UserListModal open={usersList} onClose={(roomId: string = selectedConversation?._id) => {
-        navigate(`?roomId=${roomId}`);
+        window.location.href = `?roomId=${roomId}`
         setSelectedConversation(roomList.find(r => r._id === roomId));
         setisUserListModalOpen(false)
       }}

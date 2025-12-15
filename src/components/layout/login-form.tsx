@@ -62,7 +62,7 @@ export function LoginForm({
           {error && <p className="text-sm text-red-600 mt-2">Login failed. Please check your credentials.</p>}
           <FieldDescription className="text-center">
             Don&apos;t have an account?{" "}
-            <a href="#" className="underline underline-offset-4">
+            <a href="/register" className="underline underline-offset-4">
               Sign up
             </a>
           </FieldDescription>

@@ -25,7 +25,7 @@ export function UserListModal({ open, onClose }: UserListModalProps) {
 
     const { data: users } = useGetUsersQuery({});
     return (
-        <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+        <Dialog open={open} onOpenChange={(isOpen) => !isOpen } >
             <DialogContent className="sm:max-w-md max-h-[400px] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Users</DialogTitle>
