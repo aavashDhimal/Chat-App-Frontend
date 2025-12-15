@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes,Navigate } from "react-router-dom"
 import LoginPage from "./pages/auth/page"
 import ChatPage from "./pages/chat/chat"
 import RegisterPage from "./pages/auth/register"
@@ -13,6 +13,8 @@ function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/chat" element={<ChatPage />} />
+          <Route path="*" element={<Navigate to="/chat" replace />} />
+
         </Route>
       </Routes>
 

@@ -4,7 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 
-export default function InputBox({ setMessageInput, messageInput, handleSendMessage }: any) {
+interface InputBoxProps {
+  messageInput: string;
+  setMessageInput: (value: string) => void;
+  handleSendMessage: () => void;
+}
+
+export default function InputBox({ setMessageInput, messageInput, handleSendMessage }: InputBoxProps) {
     return (
         <div className="border-t p-4">
             <div className="flex gap-2">

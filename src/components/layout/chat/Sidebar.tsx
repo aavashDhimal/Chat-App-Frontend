@@ -14,37 +14,34 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/context/auth';
+import { useNavigate } from 'react-router-dom';
+import { useGetRoomsQuery } from '@/services/roomApi';
 
-interface Conversation {
-  id: string;
+interface Rooms {
+  _id: string;
   name: string;
-  avatar: string;
-  messages: Array<{
-    id: string;
-    sender: string;
-    text: string;
-    timestamp: string;
-  }>;
 }
 
 interface SideBarProps {
-  conversations: Conversation[];
-  selectedConversation: Conversation;
-  onSelectConversation: (conversation: Conversation) => void;
+  selectedConversation: Rooms;
+  setisUserListModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onSelectConversation: (conversation: Rooms) => void;
   onAddConversation: () => void;
   onDeleteConversation: (id: string) => void;
 }
 
 export default function SideBar({
-  conversations,
   selectedConversation,
   onSelectConversation,
   onAddConversation,
 }: SideBarProps) {
 
-
+  console.log(selectedConversation, "sscon")
   const { logout } = useAuth();
+  const rooms = useGetRoomsQuery({}).data || [];
+  const navigate = useNavigate();
 
   return (
     <Sidebar collapsible="none" className="border-r">
@@ -62,31 +59,36 @@ export default function SideBar({
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Recent Chats</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {conversations.map((conversation) => (
-                <SidebarMenuItem key={conversation.id}>
-                  <SidebarMenuButton
-                    isActive={selectedConversation.id === conversation.id}
-                    onClick={() => onSelectConversation(conversation)}
-                    className="flex items-center gap-3 h-14"
-                  >
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage color="white" alt={conversation.name} />
-                      <AvatarFallback>{conversation.name[0]}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 overflow-hidden">
-                      <div className="font-medium truncate">{conversation.name}</div>
-                    </div>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+      <SidebarContent className="overflow-hidden">
+        <ScrollArea className="h-full">
+          <SidebarGroup>
+            <SidebarGroupLabel>Recent Chats</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                  {rooms?.map((conversation: Rooms) => (
+                  <SidebarMenuItem key={conversation._id}>
+                    <SidebarMenuButton
+                      isActive={true}
+                      onClick={() => {
+                        onSelectConversation(conversation)
+                        navigate(`?roomId=${conversation._id}`)
+                      }}
+                      className="flex items-center gap-3 h-14"
+                    >
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage color="white" alt={conversation.name} />
+                        <AvatarFallback>{conversation.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 overflow-hidden">
+                        <div className="font-medium truncate">{conversation.name}</div>
+                      </div>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </ScrollArea>
       </SidebarContent>
       <SidebarFooter>
         <div className="p-4 text-sm text-center cursor-pointer hover:bg-muted rounded-md" onClick={logout}>
